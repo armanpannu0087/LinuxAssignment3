@@ -1,6 +1,6 @@
-# LinuxAssignment3
+# LinuxAssignment3 Part 2 
 # Armandeep Pannu A01339822
-# Setting Up a Debian 12 Server on DigitalOcean
+# Setting Up a Debian 12 Server on DigitalOcean and Linking with Nginx
 
 This tutorial will guide you through the process of setting up a fresh Debian 12 server on DigitalOcean. We will create a new regular user, configure it for administrative tasks, and secure SSH access. Additionally, we'll install and configure Nginx to serve a sample website.
 
@@ -287,7 +287,120 @@ This tutorial will guide you through the process of setting up a fresh Debian 12
      sudo nginx -t
      ```
 
-   After you are done with all the steps, you are all set!!!
-   Congratulation!! Your Debian 12 server is now configured with a new user, secure SSH access, and an Nginx server serving a sample website.
+
+   **After you are done with all the steps, you are all set!!!
+   Congratulation!! Your Debian 12 server is now configured with a new user, secure SSH access, and an Nginx server serving a sample website.**
+
+   **Now for the second part we need to follow the same steps to:**
+   - Create 2 new Debian 12 servers with the following:
+   - host names of "web1" and "web2"
+    - a tag of web
+    - a new regular user, "web"
+
+      - The web user should be able to connect to the server via ssh
+      - The web user should have bash set as their login shell
+      - The web user should be a member of the sudo group
+     
+
+   
+
+## Step 5:Installing UFW (Uncomplicated Firewall)
+1. ** Install UFW on the server
+   
+   **Objective**:To install and configure UFW for basic firewall Management.
+   - Command:
+   ```bash
+   sudo apt install ufw
+   ```
+3. ** Configure UFW to Allow Incoming Traffic:
+
+   **Objective: Allowing incoming HTTP and SSh traffic.
+   - Command:
+    ```bash
+   sudo ufw allow http
+   ```
+
+## Step 6: Setting Up Backend Components 
+1. **Copy Backend Binary to Servers:
+
+   **Objective**: Copy the backend binary to each server, replacing '{your_binary} with your actual binary file.
+   - Command:
+   ```bash
+   scp -i [location] [your_binary] [username]@your_server_ip:/path/to/backend/
+   ```
+2. **Edit  hello-server service for Backend:
+
+   **Objective**: Modify the 'hello-server.service' file to start your backend.
+ Replace '{your_backend}'with the actual name of your backend binary.
+   - Command:
+   ```bash
+   sudo vim /etc/systemd/system/hello-server.service
+   ```
+3. **Start and Enable the Backend Service:
+
+   **Objective**: Start and enables the backend service.
+   - Command
+   ```bash
+   sudo systemctl start hello-server
+   sudo systemctl enable hello-server
+   ```
+
+## Step 7: Load Balancer Setup
+1. **Create Digital Ocean Load Balancer:
+   
+   **Obejective**: Create a New DO Load Balancer and add both "web1" and "web2" servers to it.
+
+2. **Test Servers using cURL and Load Balancer IP:
+   
+   **Objectives**: Use the included cURL commands with your load balancer IP address to test the servers.
+   - Command
+   ```bash
+   curl http://your-load-balancer-ip/
+   curl http://your-load-balancer-ip/hey
+   curl http://your-load-balancer-ip/echo
+   ```
+
+## Step 8: Nginx Configuration for Backend Proxy
+1. **Edit Nginx Configuration for Backend Proxy:
+   
+   **Obejective**: Modify the Nginx configuration to act as a proxy server for the backend. Edit the **/etc/nginx/sites-available/default** file.
+   - Command
+   ```bash
+   sudo vim /etc/nginx/sites-avaiablable/my-site.conf
+   ```
+  **Nginx Configuration Sample Code:
+  ```nginx
+    server {
+    listen 80;
+    listen [::]:80;
+
+    root /var/www/my-site;
+
+    index index.html;
+
+    server_name _;
+
+    location / {
+      # First attempt to serve request as file, then
+      # as directory, then fall back to displaying a 404.
+      try_files $uri $uri/ =404;
+    }
+  }
+  ```
+
+2. **Reload Nginx Configuration:
+
+   **Objectives**: Apply the changes made to the Nginx configuration
+   - Command
+   ```bash
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
+
+  
+
+   
+
+   
   
      
